@@ -296,31 +296,12 @@ public:
 
             if (paciente != nullptr)
             {
-                std::cout << paciente->nome << " " << chamada_mais_urgente->gravidade << "\n";
+                // std::cout << paciente->nome << " " << chamada_mais_urgente->gravidade << "\n";
+                std::cout << paciente->nome << "\n";
             }
             delete chamada_mais_urgente;
         }
 
-        // while (chamadas_heap.tamanho() > 0)
-        // {
-        //     Chamada *chamada_mais_urgente = chamadas_heap.extrai_maxima();
-        //     std::cout << "Extraindo chamada - ID do paciente: " << chamada_mais_urgente->id_paciente
-        //             << ", Gravidade: " << chamada_mais_urgente->gravidade << "\n";
-
-        //     Paciente *paciente = tabela->get_paciente(chamada_mais_urgente->id_paciente);
-
-        //     if (paciente != nullptr)
-        //     {
-        //         std::cout << "Paciente: " << paciente->nome << " com gravidade: "
-        //                 << chamada_mais_urgente->gravidade << "\n";
-        //     }
-        //     else
-        //     {
-        //         std::cout << "Erro: Paciente com ID " << chamada_mais_urgente->id_paciente << " não encontrado!\n";
-        //     }
-
-        //     delete chamada_mais_urgente;
-        // }
     }
 };
 
