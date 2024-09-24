@@ -9,26 +9,24 @@
 // Bibliotecas
 #include <iostream>
 #include <cstdlib>
-#include <string>
-#include <vector>
-#include <climits>
-// Permite declarar variáveis e funções relacionadas a strings e vetores sem o uso de std::
-using std::string;
-using std::vector;
 
-#define MAX 50
+#define MAX 200
+#define MAX_NOME 70
+#define MAX_ENFERMIDADE 50
 
 // ---------- Registros médicos ---------- //
-/*
-    "Uma tabela de dispersão é usada para armazenar os registros médicos dos pacientes, permitindo uma busca rápida pelo seu histórico, onde a chave é o número de identificação do paciente, mais outras informações como nome e enfermidade."
-*/
+
 class Paciente
 {
 public:
-    string nome;
-    string enfermidade;
+    char nome[MAX_NOME];
+    char enfermidade[MAX_ENFERMIDADE];
 
-    Paciente() : nome(""), enfermidade("") {}
+    Paciente()
+    {
+        nome[0] = '\0';
+        enfermidade[0] = '\0';
+    }
 };
 
 class TabelaDispersao
@@ -37,38 +35,48 @@ private:
     Paciente pacientes[MAX];
     int ids[MAX];
 
-    int calcular_id(const string &nome)
+    int calcular_id(const char *nome)
     {
-        int soma = 0;
-        for (char c : nome)
+        int hash = 0;
+        int primo = 31; // Fator primo para melhor dispersão
+
+        for (int i = 0; nome[i] != '\0'; i++)
         {
-            soma += c;
+            hash = primo * hash + nome[i]; // Multiplica o hash anterior por um número primo e adiciona o valor ASCII do caractere
         }
-        return soma % MAX;
+
+        return abs(hash) % MAX; // Garante que o hash seja positivo e dentro do intervalo permitido
     }
 
-    // Função de dispersão
     int insere_aberto(int x)
     {
         int i = 0;
         int j;
         do
         {
-            // Calcula a posição j garantindo que esteja dentro dos limites da tabela
-            j = (x + i) % MAX;
-            // Se a posição j estiver vazia, insere x
+            j = (x + i * i) % MAX;
             if (ids[j] == -1)
             {
                 ids[j] = x;
                 return j;
             }
             i++;
-        } while (i < MAX); // Enquanto não percorrer toda a tabela
+        } while (i < MAX);
         return MAX; // Tabela cheia
     }
 
+    void copiar_string(const char *origem, char *destino)
+    {
+        int i = 0;
+        while (origem[i] != '\0' && i < MAX_NOME - 1)
+        {
+            destino[i] = origem[i];
+            i++;
+        }
+        destino[i] = '\0';
+    }
+
 public:
-    // Construtor da tabela com posições vazias
     TabelaDispersao()
     {
         for (int i = 0; i < MAX; i++)
@@ -77,47 +85,56 @@ public:
         }
     }
 
-    // Processar entrada do usuário
-    void processar_entrada(const string &linha)
+    void processar_entrada(char *linha)
     {
+        char nome[MAX_NOME];
+        char enfermidade[MAX_ENFERMIDADE];
+        int i = 0, j = 0;
 
-        string nome, enfermidade;
-        size_t virgula_pos = linha.find(',');
-        // Se encontrar a vírgula, separa nome e enfermidade
-        if (virgula_pos != string::npos)
+        // Separar nome e enfermidade pela vírgula
+        while (linha[i] != ',' && linha[i] != '\0' && i < MAX_NOME - 1)
         {
-            nome = linha.substr(0, virgula_pos);
-            enfermidade = linha.substr(virgula_pos + 1);
+            nome[i] = linha[i];
+            i++;
+        }
+        nome[i] = '\0';
 
-            // Remove espaços em branco no início da enfermidade
-            enfermidade.erase(0, enfermidade.find_first_not_of(" "));
+        if (linha[i] == ',')
+        {
+            i++; // Ignorar a vírgula
+        }
 
-            // Verifica se as strings não estão vazias
-            if (!nome.empty() && !enfermidade.empty())
-            {
-                cadastrar_paciente(nome, enfermidade);
-            }
-            else
-            {
-                std::cout << "Entrada inválida!\n";
-            }
+        while (linha[i] == ' ')
+        {
+            i++; // Ignorar espaços após a vírgula
+        }
+
+        while (linha[i] != '\0' && j < MAX_ENFERMIDADE - 1)
+        {
+            enfermidade[j] = linha[i];
+            i++;
+            j++;
+        }
+        enfermidade[j] = '\0';
+
+        if (nome[0] != '\0' && enfermidade[0] != '\0')
+        {
+            cadastrar_paciente(nome, enfermidade);
         }
         else
         {
-            std::cout << "Formato inválido! Esperado: Nome, Enfermidade\n";
+            std::cout << "Entrada inválida!\n";
         }
     }
 
-    void cadastrar_paciente(const string &nome, const string &enfermidade)
+    void cadastrar_paciente(const char *nome, const char *enfermidade)
     {
-
         int id = calcular_id(nome);
         int posicao = insere_aberto(id);
-        // Se a posição estiver vazia, insere o paciente
         if (posicao < MAX)
         {
-            pacientes[posicao].nome = nome;
-            pacientes[posicao].enfermidade = enfermidade;
+            copiar_string(nome, pacientes[posicao].nome);
+            copiar_string(enfermidade, pacientes[posicao].enfermidade);
         }
         else
         {
@@ -130,7 +147,6 @@ public:
         std::cout << "\nIdentificações dos pacientes:\n";
         for (int i = 0; i < MAX; i++)
         {
-            // Se a posição não estiver vazia, imprime o ID e o nome do paciente
             if (ids[i] != -1)
             {
                 std::cout << ids[i] << " " << pacientes[i].nome << "\n";
@@ -138,43 +154,38 @@ public:
         }
     }
 
-    // Retorna o paciente com o ID de interesse
     Paciente *get_paciente(int id)
     {
         for (int i = 0; i < MAX; i++)
         {
-            // Se o ID for encontrado, retorna o paciente
             if (ids[i] == id)
             {
                 return &pacientes[i];
             }
         }
-        // Se não encontrar o ID, retorna ponteiro nulo
         return nullptr;
     }
 };
 
 // ---------- Gerenciamento das chamadas de emergência ---------- //
-/*
-    "Uma lista de prioridades é usada para gerenciar as chamadas de emergência, onde cada chamada é classificada de acordo com o nível de gravidade. A gravidade é atribuída como um valor numérico: quanto maior o número, maior a gravidade. Assim, o sistema precisa sempre atender primeiro as chamadas mais críticas. Ou seja, as chamadas de emergência são armazenadas na lista de prioridades e a operação principal é a *inserção* de novas chamadas e a *extração* do paciente mais urgente."
-*/
 
 class Chamada
 {
 public:
     int id_paciente;
     int gravidade;
-    // Construtor
+
     Chamada(int id, int grav) : id_paciente(id), gravidade(grav) {}
 };
 
 // --------- Manutenção do Max-Heap | Lista de Prioridades --------- //
+
 class MaxHeap
 {
 private:
-    vector<Chamada *> chamadas;
+    Chamada *chamadas[MAX];
+    int tamanho_atual;
 
-    // Funções para manter a propriedade de Max-Heap
     int pai(int i)
     {
         return (i - 1) / 2;
@@ -182,12 +193,12 @@ private:
 
     int esquerdo(int i)
     {
-        return 2 * (i + 1) - 1;
+        return 2 * i + 1;
     }
 
     int direito(int i)
     {
-        return 2 * (i + 1);
+        return 2 * i + 2;
     }
 
     void troca(int i, int j)
@@ -199,19 +210,19 @@ private:
 
     void desce(int i)
     {
-        int e, d, maior;
+        int e = esquerdo(i);
+        int d = direito(i);
+        int maior = i;
 
-        e = esquerdo(i);
-        d = direito(i);
-        maior = i;
-
-        if (e < (int)chamadas.size() && chamadas[e]->gravidade > chamadas[i]->gravidade)
+        if (e < tamanho_atual && chamadas[e]->gravidade > chamadas[i]->gravidade)
+        {
             maior = e;
-        else
-            maior = i;
+        }
 
-        if (d < (int)chamadas.size() && chamadas[d]->gravidade > chamadas[maior]->gravidade)
+        if (d < tamanho_atual && chamadas[d]->gravidade > chamadas[maior]->gravidade)
+        {
             maior = d;
+        }
 
         if (maior != i)
         {
@@ -230,37 +241,37 @@ private:
     }
 
 public:
-    MaxHeap() {};
+    MaxHeap() : tamanho_atual(0) {}
 
     void insere(Chamada *chamada)
     {
-        // Insere a chamada no final do vetor
-        chamadas.push_back(chamada);
-        // Restaura a propriedade Max-Heap
-        sobe(chamadas.size() - 1);
+        if (tamanho_atual < MAX)
+        {
+            chamadas[tamanho_atual] = chamada;
+            sobe(tamanho_atual);
+            tamanho_atual++;
+        }
     }
 
     Chamada *extrai_maxima()
     {
-
-        if (chamadas.size() > 0)
+        if (tamanho_atual > 0)
         {
-
             Chamada *maior = chamadas[0];
-            chamadas[0] = chamadas.back();
-            chamadas.pop_back();
+            chamadas[0] = chamadas[tamanho_atual - 1];
+            tamanho_atual--;
             desce(0);
             return maior;
         }
         else
         {
-            return nullptr; // Lista vazia
+            return nullptr;
         }
     }
 
     int tamanho()
     {
-        return chamadas.size();
+        return tamanho_atual;
     }
 };
 
@@ -271,24 +282,18 @@ private:
     MaxHeap chamadas_heap;
 
 public:
-    // Construtor
     ListaPrioridade(TabelaDispersao *t) : tabela(t) {}
 
-    // Adiciona chamadas de emergência | Construção do MaxHeap e Inserção na Lista de Prioridades
     void adicionar_chamada(int id, int gravidade)
     {
         Chamada *nova_chamada = new Chamada(id, gravidade);
         chamadas_heap.insere(nova_chamada);
     }
 
-    // chamadas_heap.constroi_max_heap(num_chamadas, chamadas_heap.chamadas);
-
-    // Atendimento das chamadas | Extração Lista de Prioridades
     void atender_chamadas()
     {
         std::cout << "\nLista de Atendimentos Prioritários: \n";
 
-        // Imprime a lista de atendimentos prioritários | Extração do mais urgente ao menos urgente
         while (chamadas_heap.tamanho() > 0)
         {
             Chamada *chamada_mais_urgente = chamadas_heap.extrai_maxima();
@@ -296,18 +301,15 @@ public:
 
             if (paciente != nullptr)
             {
-                // std::cout << paciente->nome << " " << chamada_mais_urgente->gravidade << "\n";
                 std::cout << paciente->nome << "\n";
             }
             delete chamada_mais_urgente;
         }
-
     }
 };
 
 int main()
 {
-
     TabelaDispersao tabela;
     ListaPrioridade lista_prioridade(&tabela);
 
@@ -319,26 +321,26 @@ int main()
 
     for (int i = 0; i < n; i++)
     {
-        char linha[MAX];
+        char linha[MAX_NOME + MAX_ENFERMIDADE];
         std::cout << "Digite o nome e a enfermidade (formato: Nome, Enfermidade): ";
         std::cin.getline(linha, sizeof(linha));
 
-        tabela.processar_entrada(linha); // Passa a linha completa para processar_entrada
+        tabela.processar_entrada(linha);
     }
 
-    tabela.imprimir_identificacoes(); // Imprime as identificações e os respectivos nomes dos pacientes
+    tabela.imprimir_identificacoes();
 
     // ----------------- Cadastrando chamadas de emergência ----------------- //
-    std::cout << "Digite as chamadas (id_paciente gravidade):\n";
+    std::cout << "\nDigite as chamadas (id_paciente gravidade):\n";
 
     for (int i = 0; i < n; i++)
     {
         int id, gravidade;
         std::cin >> id >> gravidade;
-        lista_prioridade.adicionar_chamada(id, gravidade); // Adiciona a gravidade da chamada
+        lista_prioridade.adicionar_chamada(id, gravidade);
     }
 
-    lista_prioridade.atender_chamadas(); // Imprime a lista de prioridades
+    lista_prioridade.atender_chamadas();
 
     return 0;
-};
+}

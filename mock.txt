@@ -17,6 +17,13 @@ Sandra Aparecida Marques, Covid
 Guilherme Antonio de Oliveira, Enxaqueca
 Sonia Souza, Osteoporose
 
+----
+4
+Sara Veiga Oliveira, Pneumonia
+Artur Ferreira, Toxoplasmose
+Guilherme Antonio de Oliveira, Enxaqueca
+Sergio Henrique Fernandes, Pneumonia
+
 # Chamadas
 1 7
 6 8
