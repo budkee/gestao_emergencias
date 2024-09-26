@@ -5,7 +5,7 @@
 # Alterar a mensagem conforme o que foi feito no dia 
 
 git add .
-git commit -m "Refatoração removendo libs | #01"
+git commit -m "Ajustes | #01"
 echo "\n"
 git push
 echo "\n"

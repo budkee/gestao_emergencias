@@ -1,6 +1,6 @@
 /**************************************************
  *
- * Isabele Bicudo e Kaê de Oliveira Budke
+ * Isabelle Bicudo e Kaê de Oliveira Budke
  * Trabalho 1
  * Professor(a): Fábio Henrique Viduani Martinez
  *
