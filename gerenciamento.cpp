@@ -2,7 +2,7 @@
  *
  * Isabelle Bicudo e Kaê de Oliveira Budke
  * Trabalho 1
- * Professor(a): Fábio Henrique Viduani Martinez
+ * Professor: Fábio Henrique Viduani Martinez
  *
  */
 
@@ -177,8 +177,6 @@ public:
 
     Chamada(int id, int grav) : id_paciente(id), gravidade(grav) {}
 };
-
-// --------- Manutenção do Max-Heap | Lista de Prioridades --------- //
 
 class MaxHeap
 {
